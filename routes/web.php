@@ -14,4 +14,6 @@
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/test', 'PostController@asd');
+Route::get('/posts/populate', 'PostController@populate');
+Route::get('/posts/', 'PostController@index');
+Route::get('/posts/crate', 'PostController@create');
