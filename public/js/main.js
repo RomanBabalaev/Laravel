@@ -4,35 +4,49 @@ $('body').on('click', 'a[href*="/product/buy"]', function(e) {
     var productId = $(this).data('id');
     var gamename = $('#product_'+productId).text();
 
-    swal({
-        title: "Заказ игры<br>"+gamename,
-        showCancelButton: true,
-        confirmButtonColor: '#619c34',
-        confirmButtonText: 'Заказать',
-        cancelButtonText: 'Отмена',
-        html:
-        '<input id="swal-input-name" class="swal2-input" required>' +
-        '<input id="swal-input-email" class="swal2-input" required>',
-        preConfirm: function () {
-            return new Promise(function (resolve) {
-                resolve([
-                    $('#swal-input-name').val(),
-                    $('#swal-input-email').val()
-                ])
-            })
-        },
-        onOpen: function () {
-            $('#swal-input-name').val("").focus();
-            $('#swal-input-email').val("");
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
-    }).then(
+    });
+
+    var userName = '';
+    var userEmail = '';
+
+    $.ajax({
+        url: '/user/info',
+        type: 'POST',
+        dataType: 'json',
+        data: {}
+    }).done(function (data) {
+        userName = data.name;
+        userEmail = data.email;
+    }).then( result => {
+        swal({
+                 title: "Заказ игры",
+                 showCancelButton: true,
+                 confirmButtonColor: '#500c34',
+                 confirmButtonText: 'Заказать',
+                 cancelButtonText: 'Отмена',
+                 html:
+                 '<h2 style="margin-top: 0; margin-bottom: 20px; color: #bf60b7;">' + gamename + '</h2>' +
+    '<label>Ваше имя: <input id="swal-input-name" class="swal2-input" placeholder="Ваше имя" required></label>' +
+    '<label>Ваш e-mail: <input id="swal-input-email" class="swal2-input" placeholder="Ваше e-mail" required></label>',
+        preConfirm: function () {
+        return new Promise(function (resolve) {
+            resolve([
+                $('#swal-input-name').val(),
+                $('#swal-input-email').val()
+            ])
+        })
+    },
+    onOpen: function () {
+        $('#swal-input-name').val(userName).focus();
+        $('#swal-input-email').val(userEmail);
+    }
+}).then(
         result => {
         if (result.value) {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
         $.ajax({
             url: '/orders/new',
             type: 'POST',
@@ -46,10 +60,10 @@ $('body').on('click', 'a[href*="/product/buy"]', function(e) {
             .done(function (data) {
                 if (data.result == 'success') {
                     swal({
-                        title: 'Спасибо за Ваш заказ!',
-                        text: 'Вам направлено письмо на e-mail',
+                        title: 'Спасибо за заказ!',
+                        text: 'Мы свяжемся с Вами по e-mail',
                         type: 'success',
-                        confirmButtonColor: '#999f19',
+                        confirmButtonColor: '#619c34',
                         confirmButtonText: 'OK'
                     });
                 } else {
@@ -57,21 +71,16 @@ $('body').on('click', 'a[href*="/product/buy"]', function(e) {
                         type: 'error',
                         title: 'Произошла ошибка',
                         text: data.errorMessage
-                    }).then((result) => {
-                        window.location.reload();
-                })
+                    });
                 }
             })
             .fail(function () {
-                // Сообщение об ошибке
                 swal({
                     type: 'error',
-                    title: 'ООооууу',
-                    text: 'Хьюстон, у нас проблемы!'
-                }).then((result) => {
-                    window.location.reload();
-            })
+                    title: 'Упс...',
+                    text: 'Что-то пошло не так'
+                });
             });
     }
-});
-});
+})
+})

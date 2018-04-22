@@ -1,32 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
+namespace App;
 
-class CreateCategoriesTable extends Migration
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable
 {
+    use Notifiable;
     /**
-     * Run the migrations.
+     * The attributes that are mass assignable.
      *
-     * @return void
+     * @var array
      */
-    public function up()
-    {
-        Schema::create('categories', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->string('description');
-            $table->timestamps();
-        });
-    }
+    protected $fillable = [
+        'name', 'email', 'password', 'is_admin'
+    ];
     /**
-     * Reverse the migrations.
+     * The attributes that should be hidden for arrays.
      *
-     * @return void
+     * @var array
      */
-    public function down()
-    {
-        Schema::dropIfExists('categories');
-    }
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
 }

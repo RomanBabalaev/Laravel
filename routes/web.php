@@ -13,7 +13,8 @@ Route::get('/', function () {
 Route::get('/about', function () {
     $data = [
         'title' => 'ГеймсМаркет - О компании',
-        'categories' => Category::all()
+        'categories' => Category::all(),
+        'products' => Product::all()->random(3)
     ];
     return view('about', $data);
 });
@@ -32,4 +33,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/products/store', 'ProductController@store');
     Route::get('/products/edit/{prod_id}', 'ProductController@edit');
     Route::post('/products/update/{prod_id}', 'ProductController@update');
+    Route::get('/products/destroy/{prod_id}', 'ProductController@destroy');
+    Route::get('/settings/', 'SettingsController@index');
+    Route::post('/settings/store', 'SettingsController@store');
 });
+Route::get('/category/{cat_id}', 'CategoryController@content');
+Route::get('/product/details/{prod_id}', 'ProductController@details');
+Route::post('/user/info', 'UserController@info');
+Route::post('/orders/new', 'OrderController@store');
+Route::get('/orders/', 'OrderController@index');

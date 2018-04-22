@@ -1,9 +1,13 @@
 <?php
 
+
 namespace App\Http\Controllers;
+
 use App\Category;
+use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 class CategoryController extends Controller
 {
     public function index()
@@ -26,6 +30,10 @@ class CategoryController extends Controller
         if (!Auth::user()->is_admin) {
             return redirect('/categories');
         }
+        $this->validate($request, [
+            'name' => 'required',
+            'description' => 'required',
+        ]);
         $cat = new Category();
         $cat->name = $request->get('name');
         $cat->description = $request->get('description');
@@ -47,6 +55,10 @@ class CategoryController extends Controller
         if (!Auth::user()->is_admin) {
             return redirect('/categories');
         }
+        $this->validate($request, [
+            'name' => 'required',
+            'description' => 'required',
+        ]);
         $cat = Category::find($cat_id);
         $cat->name = $request->name;
         $cat->description = $request->description;
@@ -60,5 +72,16 @@ class CategoryController extends Controller
         }
         Category::destroy($cat_id);
         return redirect('/categories');
+    }
+    public function content($cat_id)
+    {
+        $category = Category::find($cat_id);
+        $data = [
+            'category' => $category,
+            'title' => 'ГеймсМаркет - ' . $category->name,
+            'categories' => Category::all(),
+            'products' => Product::where('category_id','=', $category->id)->get()
+        ];
+        return view('category', $data);
     }
 }
